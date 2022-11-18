@@ -1,0 +1,6 @@
+---
+version: 3.0
+
+meta_server_addr:
+mq_server_addr:
+resolver_mgr_server_addr:

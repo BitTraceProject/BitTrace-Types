@@ -1,0 +1,6 @@
+---
+version: 3.0
+
+tag:
+basepath:
+receiver_server_addr:

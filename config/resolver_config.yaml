@@ -1,0 +1,7 @@
+---
+version: 3.0
+
+meta_server_addr:
+resolver_config:
+  mq_server_addr:
+  collector_server_addr:
