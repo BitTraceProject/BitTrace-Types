@@ -8,25 +8,29 @@ package protocol
 type (
 	// 通用的接口
 
+	// GetKeyArgs 查询 key 是否存在
 	GetKeyArgs struct {
 		Key string `json:"key"`
 	}
+	// GetKeyReply 返回是否，不包括 Value
 	GetKeyReply struct {
 		OK bool `json:"ok"`
 	}
-
+	// GetValueArgs 返回 Value
 	GetValueArgs struct {
 		Key string `json:"key"`
 	}
+	// GetValueReply 返回 Value 和是否存在
 	GetValueReply struct {
 		Value string `json:"value"`
 		OK    bool   `json:"ok"`
 	}
-
+	// SetValueArgs 设置 Value
 	SetValueArgs struct {
 		Key   string `json:"key"`
 		Value string `json:"value"`
 	}
+	// SetValueReply 返回 Value 设置情况，true 代表添加成功，false 更新成功，即 Key 原本已存在
 	SetValueReply struct {
 		OK bool `json:"ok"`
 	}

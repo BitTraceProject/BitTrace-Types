@@ -8,6 +8,7 @@ import (
 
 type EnvKey int
 
+// TODO 根据实际情况设置这些 env key
 const (
 	ROOT_DIR = iota
 	CLIENT_DIR
@@ -28,7 +29,7 @@ func (envKey EnvKey) String() string {
 	return envKeyStr[envKey]
 }
 
-// LookupEnvPairs 根据所有 key 查找环境变量，如果中途有 error 会直接中断
+// LookupEnvPairs 根据所有 key 查找环境变量，并通过 map 保存，如果中途有 error 会直接中断
 func LookupEnvPairs(envPairs *map[string]string) error {
 	for keyStr := range *envPairs {
 		env, ok := os.LookupEnv(keyStr)
@@ -40,7 +41,7 @@ func LookupEnvPairs(envPairs *map[string]string) error {
 	return nil
 }
 
-// LookupEnvPairsByKey 根据所有 key 查找环境变量，如果中途有 error 会直接中断
+// LookupEnvPairsByKey 根据所有 key 查找环境变量，并通过 map 保存，如果中途有 error 会直接中断
 // 通过限定 EnvKey 使得调用者只能从已定义的 Env 中选取
 func LookupEnvPairsByKey(envPairs *map[EnvKey]string) error {
 	for key := range *envPairs {

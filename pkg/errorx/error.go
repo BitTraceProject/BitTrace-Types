@@ -2,6 +2,7 @@ package errorx
 
 import "errors"
 
+// TODO error 标准化，最后需要整理一下
 var (
 	/*
 		ErrorX cli errors

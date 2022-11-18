@@ -3,28 +3,27 @@ package structure
 import "time"
 
 type (
-	// Status 只需传值
+	// Status 维护了已存在的 MainChain 和 SideChain 的 WorldStatus，支持一系列管理操作，只需传值
 	Status struct {
 		MainChainWorldStatus    *WorldStatus            `json:"main_chain_world_status"`
 		SideChainWorldStatusMap map[string]*WorldStatus `json:"side_chain_world_status_map"`
 	}
-	// StatusTransfer 传指针
-	// TODO 解决 event 与 result 对应问题
+	// StatusTransfer 是对与 WorldStatus 的一次操作，称为`状态迁移`，传指针
 	StatusTransfer struct {
-		ChainID        string          `json:"chain_id"`
-		FieldName      string          `json:"field_name"` // 也可以通过 reflect 获取 field
-		OP             TransferOperate `json:"op"`
-		OPDetail       string          `json:"op_detail"`
-		RelevantEvent  Event           `json:"relevant_event"`
-		RelevantResult Result          `json:"relevant_result"`
+		ChainID        string          `json:"chain_id"`        // 唯一标识当前状态迁移针对的哪一个链
+		FieldName      string          `json:"field_name"`      // 操作的目标 Field，也可以通过 reflect 获取 field
+		OP             TransferOperate `json:"op"`              // 操作类型
+		OPDetail       string          `json:"op_detail"`       // 操作的具体内容，根据 OP 还原出操作
+		RelevantEvent  Event           `json:"relevant_event"`  // 状态迁移所关联的事件，事件发生会导致结果
+		RelevantResult Result          `json:"relevant_result"` // 事件对应的结果，这个结果才最终会导致状态的迁移
 	}
-	// WorldStatus 传指针
+	// WorldStatus 是各种自定义标准化属性的集合，传指针
 	WorldStatus struct {
 		ChainID        string    `json:"chain_id"`
-		ChainHeight    int64     `json:"chain_height"`
-		Bits           int64     `json:"bits"`
-		TotalTxn       int64     `json:"total_txn"`
-		NextMedianTime time.Time `json:"next_median_time"`
+		ChainHeight    int64     `json:"chain_height"`     // 当前链的高度
+		Bits           int64     `json:"bits"`             // 当前链的网络难度
+		TotalTxn       int64     `json:"total_txn"`        // 当前链的交易数目
+		NextMedianTime time.Time `json:"next_median_time"` // 下一次出块时间估计
 	}
 	TransferOperate int
 )
@@ -35,19 +34,27 @@ const (
 	None  = -1                   // no operate
 )
 
-func NewStatus(mainChainWorldStatus *WorldStatus) Status {
-	return Status{MainChainWorldStatus: mainChainWorldStatus, SideChainWorldStatusMap: map[string]*WorldStatus{}}
+// NewStatus 初始化当前的状态
+func NewStatus(mainChainWorldStatus *WorldStatus, sideChainWorldStatusMap map[string]*WorldStatus) Status {
+	if sideChainWorldStatusMap == nil {
+		// 如果 sideChainWorldStatusMap 不存在则初始化一个空的
+		sideChainWorldStatusMap = map[string]*WorldStatus{}
+	}
+	return Status{MainChainWorldStatus: mainChainWorldStatus, SideChainWorldStatusMap: sideChainWorldStatusMap}
 }
 
+// IsMainChain 判断 chain id 是否是主链
 func (s Status) IsMainChain(chainID string) bool {
 	return chainID == s.MainChainWorldStatus.ChainID
 }
 
+// IsSideChain 判断 chain id 是否是侧链
 func (s Status) IsSideChain(chainID string) bool {
 	_, ok := s.SideChainWorldStatusMap[chainID]
 	return ok
 }
 
+// AddSideChain 添加一个侧链，如果待添加的链已经是主链返回 false，不进行任何操作，否则直接替换或者添加
 func (s Status) AddSideChain(sideChainWorldStatus *WorldStatus) bool {
 	chainID := sideChainWorldStatus.ChainID
 	if s.IsMainChain(chainID) {
@@ -59,6 +66,7 @@ func (s Status) AddSideChain(sideChainWorldStatus *WorldStatus) bool {
 	return true
 }
 
+// RemoveSideChain 移除一个侧链，如果待移除的链已经是主链返回 false，不进行任何操作，否则直接移除
 func (s Status) RemoveSideChain(chainID string) bool {
 	if s.IsMainChain(chainID) {
 		// 待删除的 side chain 在 status 处记得是 main chain，则什么都不做，返回 false
@@ -69,6 +77,7 @@ func (s Status) RemoveSideChain(chainID string) bool {
 	return true
 }
 
+// ResetMainChain 重新设置主链，如果新的主链原来是侧链，则先删除，然后直接设置（不考虑将旧主链设为侧链）
 func (s Status) ResetMainChain(newMainChainWorldStatus *WorldStatus) {
 	chainID := newMainChainWorldStatus.ChainID
 	if s.IsSideChain(chainID) {
@@ -78,6 +87,7 @@ func (s Status) ResetMainChain(newMainChainWorldStatus *WorldStatus) {
 	s.MainChainWorldStatus = newMainChainWorldStatus
 }
 
+// SwapMainChain 重新设置主链，并将旧主链设为侧链，如果新的主链原来是侧链，则先删除。如果新主链已经是主链，返回 false，什么都不做
 func (s Status) SwapMainChain(newMainChainWorldStatus *WorldStatus, removeOldMainChain bool) bool {
 	chainID := newMainChainWorldStatus.ChainID
 	if s.IsMainChain(chainID) {
@@ -98,14 +108,15 @@ func (s Status) SwapMainChain(newMainChainWorldStatus *WorldStatus, removeOldMai
 	return true
 }
 
+// Transfer 更新一次世界状态
 func (s Status) Transfer(trans *StatusTransfer) bool {
 	chainID := trans.ChainID
 	if chainID == s.MainChainWorldStatus.ChainID {
 		s.MainChainWorldStatus.Transfer(trans)
 		return true
 	}
-	if sideChainWS, ok := s.SideChainWorldStatusMap[chainID]; ok {
-		sideChainWS.Transfer(trans)
+	if sideChainWorldStatus, ok := s.SideChainWorldStatusMap[chainID]; ok {
+		sideChainWorldStatus.Transfer(trans)
 	}
 	return false
 }
@@ -126,8 +137,8 @@ func NewWorldStatus(forkHeight int64, bits int64, totalTxn int64, nextMedianTime
 	s := WorldStatus{
 		ChainID:        chainID,
 		ChainHeight:    forkHeight,
-		Bits:           0,
-		TotalTxn:       0,
+		Bits:           bits,
+		TotalTxn:       totalTxn,
 		NextMedianTime: nextMedianTime,
 	}
 	return s
