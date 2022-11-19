@@ -27,7 +27,6 @@ func InitSnapshot(targetChainID string, targetChainHeight int64, initTime time.T
 		InitTimestamp:     initTimestamp,
 		FinalTimestamp:    0,
 		InitStatus:        initStatus,
-		FinalStatus:       Status{},
 		RevisionList:      nil,
 	}
 	return s

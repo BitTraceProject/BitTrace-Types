@@ -1,6 +1,9 @@
 package structure
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 type (
 	// Status 维护了已存在的 MainChain 和 SideChain 的 WorldStatus，支持一系列管理操作，只需传值
@@ -8,7 +11,10 @@ type (
 		MainChainWorldStatus    *WorldStatus            `json:"main_chain_world_status"`
 		SideChainWorldStatusMap map[string]*WorldStatus `json:"side_chain_world_status_map"`
 	}
-	// StatusTransfer 是对与 WorldStatus 的一次操作，称为`状态迁移`，传指针
+	// StatusTransfer 是对与 WorldStatus 的一次操作，称为`状态迁移`，传指针，
+	// 由于 Status 本身会受到并发影响，单独 Snapshot 内的 Revision 可能只对 Status 产生部分影响，
+	// Revision 只能记录它本身造成的 StatusTransfer，从局部的 Revision 不一定推出完整的 StatusTransfer，
+	// 所以在处理数据时，需要将当前 Revision 时间范围内的所有 OP （可能来自多个 Revision）按照 Result 的时间戳串行化排序，来从 initStatus 推导出 finalStatus
 	StatusTransfer struct {
 		ChainID        string          `json:"chain_id"`        // 唯一标识当前状态迁移针对的哪一个链
 		FieldName      string          `json:"field_name"`      // 操作的目标 Field，也可以通过 reflect 获取 field
@@ -32,6 +38,11 @@ const (
 	Reset TransferOperate = iota // reset one field
 	Swap                         // swap all field
 	None  = -1                   // no operate
+)
+
+var (
+	bwsMux          sync.RWMutex
+	bestWorldStatus *WorldStatus
 )
 
 // NewStatus 初始化当前的状态
@@ -121,13 +132,13 @@ func (s Status) Transfer(trans *StatusTransfer) bool {
 	return false
 }
 
-func NewStatusTransfer(event Event, result Result, chainID string, fieldName string, op TransferOperate, opDetail string) *StatusTransfer {
+// NewStatusTransfer 状态迁移是面向 Result 的，NewStatusTransfer 时还没法确认是哪一个 Event 导致的该 Result（由 Revision 维护）
+func NewStatusTransfer(result Result, chainID string, fieldName string, op TransferOperate, opDetail string) *StatusTransfer {
 	return &StatusTransfer{
 		ChainID:        chainID,
 		FieldName:      fieldName,
 		OP:             op,
 		OPDetail:       opDetail,
-		RelevantEvent:  event,
 		RelevantResult: result,
 	}
 }
@@ -142,6 +153,22 @@ func NewWorldStatus(forkHeight int64, bits int64, totalTxn int64, nextMedianTime
 		NextMedianTime: nextMedianTime,
 	}
 	return s
+}
+
+// BestWorldStatus 并发获取 bestWorldStatus
+func BestWorldStatus() *WorldStatus {
+	bwsMux.RLock()
+	defer bwsMux.RUnlock()
+	return bestWorldStatus
+}
+
+// RefreshBestWorldStatus 并发刷新 bestWorldStatus，
+// 也可以选择额外维护一个 worldStatus，通过串行化的调用 Transfer 做更新，
+// bestWorldStatus 和 worldStatus 可以互相对比
+func RefreshBestWorldStatus(worldStatus *WorldStatus) {
+	bwsMux.Lock()
+	defer bwsMux.Unlock()
+	bestWorldStatus = worldStatus
 }
 
 func (ws *WorldStatus) Transfer(trans *StatusTransfer) {

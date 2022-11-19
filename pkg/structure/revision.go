@@ -3,6 +3,7 @@ package structure
 import (
 	"encoding/json"
 	"github.com/BitTraceProject/BitTrace-Types/pkg/errorx"
+	"time"
 )
 
 type (
@@ -12,9 +13,10 @@ type (
 	Revision struct {
 		Structure
 
-		Tag       Tag       `json:"tag"`
-		Context   string    `json:"context"` // Revision 生效时设置
-		Timestamp Timestamp `json:"timestamp"`
+		Tag             Tag       `json:"tag"`
+		Context         string    `json:"context"` // Revision 生效时设置
+		Timestamp       Timestamp `json:"timestamp"`
+		CommitTimestamp Timestamp `json:"commit_timestamp"` // Revision 生效时间，结合 Timestamp 和 CommitTimestamp 确定 Revision 持续时间
 
 		SnapshotID string `json:"snapshot_id"`
 		// EventMap 保存当前 Revision 期间未出结果的 Event
@@ -67,12 +69,13 @@ func (r *Revision) CommitStatusTransfer(trans *StatusTransfer, eventTag Tag) boo
 }
 
 // Commit 当前 Revision 生效，需要切换到下一个 Revision
-func (r *Revision) Commit(context string) ([]byte, error) {
+func (r *Revision) Commit(context string, commitTime time.Time) ([]byte, error) {
 	// 判断 event 是否已经清空
 	if len(r.EventMap) > 0 {
 		// 未清空返回错误
 		return nil, errorx.ErrRevisionNotCommit
 	}
 	r.Context = context
+	r.CommitTimestamp = FromTime(commitTime)
 	return json.Marshal(*r)
 }
