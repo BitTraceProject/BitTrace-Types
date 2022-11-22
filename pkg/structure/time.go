@@ -7,7 +7,7 @@ type (
 )
 
 func FromTime(t time.Time) Timestamp {
-	return Timestamp(t.UnixMilli())
+	return Timestamp(t.UnixNano())
 }
 
 func FromNow() Timestamp {
@@ -29,5 +29,5 @@ func (t Timestamp) FormatString() string {
 }
 
 func (t Timestamp) FormatTime() time.Time {
-	return time.UnixMilli(int64(t))
+	return time.Unix(0, int64(t))
 }
