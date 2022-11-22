@@ -8,7 +8,7 @@ type (
 	Snapshot struct {
 		ID                string     `json:"id"` // chain id + chain height + init timestamp
 		TargetChainID     string     `json:"target_chain_id"`
-		TargetChainHeight int64      `json:"target_chain_height"`
+		TargetChainHeight int32      `json:"target_chain_height"`
 		InitTimestamp     Timestamp  `json:"init_timestamp"`
 		FinalTimestamp    Timestamp  `json:"final_timestamp"`
 		InitStatus        Status     `json:"init_status"`
@@ -17,7 +17,7 @@ type (
 	}
 )
 
-func InitSnapshot(targetChainID string, targetChainHeight int64, initTime time.Time, initStatus Status) Snapshot {
+func InitSnapshot(targetChainID string, targetChainHeight int32, initTime time.Time, initStatus Status) Snapshot {
 	initTimestamp := FromTime(initTime)
 	id := GenSnapshotID(targetChainID, targetChainHeight, initTimestamp)
 	s := Snapshot{

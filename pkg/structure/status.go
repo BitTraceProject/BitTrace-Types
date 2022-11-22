@@ -26,7 +26,7 @@ type (
 	// WorldStatus 是各种自定义标准化属性的集合，传指针
 	WorldStatus struct {
 		ChainID        string    `json:"chain_id"`
-		ChainHeight    int64     `json:"chain_height"`     // 当前链的高度
+		ChainHeight    int32     `json:"chain_height"`     // 当前链的高度
 		Bits           int64     `json:"bits"`             // 当前链的网络难度
 		TotalTxn       int64     `json:"total_txn"`        // 当前链的交易数目
 		NextMedianTime time.Time `json:"next_median_time"` // 下一次出块时间估计
@@ -143,7 +143,7 @@ func NewStatusTransfer(result Result, chainID string, fieldName string, op Trans
 	}
 }
 
-func NewWorldStatus(forkHeight int64, bits int64, totalTxn int64, nextMedianTime time.Time) WorldStatus {
+func NewWorldStatus(forkHeight int32, bits int64, totalTxn int64, nextMedianTime time.Time) WorldStatus {
 	chainID := GenChainID(forkHeight)
 	s := WorldStatus{
 		ChainID:        chainID,
