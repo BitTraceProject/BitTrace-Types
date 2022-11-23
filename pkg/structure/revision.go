@@ -11,8 +11,6 @@ type (
 	// 同一个 Snapshot 期间，每一个过程结束时输出一次，
 	// Revision 将多个 Status 迁移，Event，Result 等打包输出
 	Revision struct {
-		Structure
-
 		Tag             Tag       `json:"tag"`
 		Context         string    `json:"context"` // Revision 生效时设置
 		Timestamp       Timestamp `json:"timestamp"`
