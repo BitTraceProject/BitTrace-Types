@@ -1,7 +1,6 @@
 package structure
 
 import (
-	"encoding/json"
 	"github.com/BitTraceProject/BitTrace-Types/pkg/errorx"
 	"time"
 )
@@ -67,13 +66,13 @@ func (r *Revision) CommitStatusTransfer(trans *StatusTransfer, eventTag Tag) boo
 }
 
 // Commit 当前 Revision 生效，需要切换到下一个 Revision
-func (r *Revision) Commit(context string, commitTime time.Time) ([]byte, error) {
+func (r *Revision) Commit(context string, commitTime time.Time) error {
 	// 判断 event 是否已经清空
 	if len(r.EventMap) > 0 {
 		// 未清空返回错误
-		return nil, errorx.ErrRevisionNotCommit
+		return errorx.ErrRevisionNotCommit
 	}
 	r.Context = context
 	r.CommitTimestamp = FromTime(commitTime)
-	return json.Marshal(*r)
+	return nil
 }
