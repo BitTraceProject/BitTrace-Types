@@ -12,4 +12,13 @@ const (
 	TIME_LAYOUT_DAY = "2006-01-02" // day 时间格式
 
 	ID_SEP_SYMBOL = "-" // id 生成的分隔符
+
+	// 框架各个根目录
+	BITTRACE_ROOT_DIR   = ".bittrace" // 部署的 bittrace 相关组件根目录，$HOME/$BITTRACE_ROOT_DIR
+	BITTRACE_CLIENT_DIR = "btcd"      // btcd client 相关文件根目录，$HOME/$BITTRACE_ROOT_DIR/$BITTRACE_CLIENT_DIR
+	BITTRACE_LOG_DIR    = "logfiles"  // 日志文件根目录，$HOME/$BITTRACE_ROOT_DIR/$BITTRACE_LOG_DIR
+	BITTRACE_CONFIG_DIR = "configs"   // 部署的 bittrace 相关组件配置目录，$HOME/$BITTRACE_ROOT_DIR/$BITTRACE_CONFIG_DIR
+
+	// 各组件配置文件名字
+	BITTRACE_EXPORTER_CONFIG_NAME = "exporter_config.yaml"
 )

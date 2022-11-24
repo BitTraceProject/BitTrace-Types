@@ -5,3 +5,10 @@ type ReceiverConfig struct {
 	MqServerAddr          string `mapstructure:"mq_server_addr"`           // receiver 服务在接收到消息后将消息放到 mq 中
 	ResolverMgrServerAddr string `mapstructure:"resolver_mgr_server_addr"` // resolver mgr 提供 resolver 的调度接口
 }
+
+func (conf *ReceiverConfig) Validate() bool {
+	return conf.MetaServerAddr != "" && conf.MqServerAddr != "" && conf.ResolverMgrServerAddr != ""
+}
+
+func (conf *ReceiverConfig) Complete() {
+}
