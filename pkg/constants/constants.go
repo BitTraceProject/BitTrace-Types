@@ -2,16 +2,22 @@ package constants
 
 import "time"
 
+// TODO 这里很多常量都要按照实际测试情况做一个估算
 const (
 	RETRY_COUNT = 3 // 调用 http 或者 rpc 接口的重试次数
 
-	LOG_EOF = "<EOF>" // 通过 EOF 符号标识一个日志文件的终结，方便 exporter 监听及时切换到下一个日志文件
+	LOG_EOF_DAY  = "<EOF_DAY>" // 通过 EOF 符号标识一个日志文件当天的终结，方便 exporter 监听及时切换到下一个日志文件
+	LOG_MAX_LINE = 10000       // exporter 按数据文件来读取，超出每个数据文件的最大条目数会切换到下一个文件
 
-	CONSUME_MQ_INTERVAL = 3 * time.Second // TODO 这里按照实际情况做一个估算，当 mq 被消费空之后，resolver 轮询 mq 的时间间隔
+	EXPORTER_POLL_INTERVAL       = 1 * time.Second   // exporter 定时检查是否新数据文件的间隔，该间隔内的数据会被打包，如果超出最大值，会先拆分再多打包几份
+	RECEIVE_DATA_PACKAGE_MAXSIZE = 100 * 1024 * 1024 // 100KB，将 exporter 的数据打包，不得超过此最大值
+
+	CONSUME_MQ_INTERVAL = 3 * time.Second
 
 	TIME_LAYOUT_DAY = "2006-01-02" // day 时间格式
 
-	ID_SEP_SYMBOL = "-" // id 生成的分隔符
+	LOG_FILENAME_SEP_SYMBOL = "_" // log filename 生成的分隔符
+	ID_SEP_SYMBOL           = "-" // id 生成的分隔符
 
 	// 框架各个根目录
 	BITTRACE_ROOT_DIR   = ".bittrace" // 部署的 bittrace 相关组件根目录，$HOME/$BITTRACE_ROOT_DIR

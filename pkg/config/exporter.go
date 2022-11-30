@@ -8,16 +8,7 @@ type (
 
 		StartDay string `mapstructure:"start_day"` // 根据日志文件名字过滤掉日期以前的文件
 		StartSeq int    `mapstructure:"start_seq"` // 根据 seq 信息，过滤掉该日期 seq 以前的文件
-
-		Mode ExporterMode `mapstructure:"mode"` // 监听模式-listen、轮询模式-poll、自动切换-auto
 	}
-	ExporterMode int
-)
-
-const (
-	ExporterModeAuto ExporterMode = iota
-	ExporterModePoll
-	ExporterModeListen
 )
 
 func (conf *ExporterConfig) Validate() bool {
@@ -26,10 +17,4 @@ func (conf *ExporterConfig) Validate() bool {
 }
 
 func (conf *ExporterConfig) Complete() {
-	if conf == nil {
-		return
-	}
-	if conf.Mode != ExporterModePoll && conf.Mode != ExporterModeListen {
-		conf.Mode = ExporterModeAuto
-	}
 }
