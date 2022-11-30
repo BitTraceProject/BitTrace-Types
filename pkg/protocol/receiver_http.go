@@ -24,11 +24,11 @@ type (
 		ExporterTag string             `json:"exporter_tag"` // 标识当前接收到的数据来自哪一个 exporter
 		DataPackage ReceiveDataPackage `json:"data_package"`
 	}
-	// ReceiveResponse 响应，返回下一个需要的 Revision 的序号，
-	// TODO 这里的返回值暂时用不到，暂时不考虑丢数据的情况（exporter 和 receiver 互相配合完成重传，累计确认，保证不丢数据）
+	// ReceiveResponse 响应，为空
+	// 由于会 retry，所以必定不会丢数据（大概率）
+	// TODO 需要测试，概率是多少，能否接受
 	ReceiveResponse struct {
-		NextDay int64 `json:"next_day"` // 下一个需要 Revision 的序号
-		NextSeq int64 `json:"next_seq"` // 下一个需要 Revision 的序号，（当 next seq 超出文件中实际的 seq 时，说明已经切换到下一个文件了，这时候 exporter 会忽略它）
+		OK bool `json:"ok"` // data package 是否成功放入 mq
 	}
 	// QuitRequest exporter 退出，中止采集任务
 	QuitRequest struct {

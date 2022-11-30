@@ -4,7 +4,7 @@ type (
 	// Message MQ 中消息的结构，Tag 用于过滤消息，Msg 是消息主体
 	Message struct {
 		Tag string `json:"tag"`
-		Msg []byte `json:"msg"` // ReceiveData
+		Msg []byte `json:"msg"` // ReceiveDataPackage
 	}
 	// PushMessageArgs 添加一个消息
 	PushMessageArgs struct {
