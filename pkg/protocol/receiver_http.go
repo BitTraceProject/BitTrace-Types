@@ -3,10 +3,12 @@ package protocol
 // receiver 目前只需要一个接口, 即接收来自任意 Exporter 的快照
 
 type (
-	ReceiveData struct {
-		Day  int64  `json:"day"`  // 当前传送快照的日期，防止乱序
-		Seq  int64  `json:"seq"`  // 当前传送快照的序号，防止乱序
-		Data []byte `json:"data"` // Revision 序列化的 Data 主体
+	ReceiveDataPackage struct {
+		Day         int64    `json:"day"`          // 当前传送数据包裹的日期，防止乱序
+		LeftSeq     int64    `json:"left_seq"`     // 当前传送数据包裹的左序号，防止乱序
+		RightSeq    int64    `json:"right_seq"`    // 当前传送数据包裹的右序号，防止乱序
+		LastSeq     int64    `json:"last_seq"`     // 当前传送数据包裹的最后一个，防止乱序
+		DataPackage [][]byte `json:"data_package"` // 快照序列化的 Data Package 主体 <=> Snapshot list
 	}
 	// JoinRequest exporter 加入，开启采集任务
 	JoinRequest struct {
@@ -19,8 +21,8 @@ type (
 	}
 	// ReceiveRequest 来自 Exporter, 用于上报原始快照数据
 	ReceiveRequest struct {
-		ExporterTag string      `json:"exporter_tag"` // 标识当前接收到的数据来自哪一个 exporter
-		Data        ReceiveData `json:"data"`
+		ExporterTag string             `json:"exporter_tag"` // 标识当前接收到的数据来自哪一个 exporter
+		DataPackage ReceiveDataPackage `json:"data_package"`
 	}
 	// ReceiveResponse 响应，返回下一个需要的 Revision 的序号，
 	// TODO 这里的返回值暂时用不到，暂时不考虑丢数据的情况（exporter 和 receiver 互相配合完成重传，累计确认，保证不丢数据）
