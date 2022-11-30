@@ -16,6 +16,14 @@ type (
 	GetKeyReply struct {
 		OK bool `json:"ok"`
 	}
+	// DelKeyArgs 查询 key 是否存在
+	DelKeyArgs struct {
+		Key string `json:"key"`
+	}
+	// DelKeyReply 返回是否，不包括 Value
+	DelKeyReply struct {
+		OK bool `json:"ok"`
+	}
 	// GetValueArgs 返回 Value
 	GetValueArgs struct {
 		Key string `json:"key"`
@@ -34,7 +42,11 @@ type (
 	SetValueReply struct {
 		OK bool `json:"ok"`
 	}
-
-	// TODO 便于使用的接口
-
+	// ClearArgs 清空 meta 信息
+	ClearArgs struct {
+	}
+	// ClearReply 返回清空结果
+	ClearReply struct {
+		OK bool `json:"ok"`
+	}
 )

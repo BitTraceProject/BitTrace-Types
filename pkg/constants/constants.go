@@ -21,4 +21,6 @@ const (
 
 	// 各组件配置文件名字
 	BITTRACE_EXPORTER_CONFIG_NAME = "exporter_config.yaml"
+	BITTRACE_RECEIVER_CONFIG_NAME = "receiver_config.yaml"
+	BITTRACE_RESOLVER_CONFIG_NAME = "resolver_config.yaml"
 )
