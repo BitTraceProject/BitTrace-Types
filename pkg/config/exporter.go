@@ -6,8 +6,8 @@ type (
 
 		Tag string `mapstructure:"tag"` // 作为 exporter 当前的唯一 Tag（如果唯一性验证失败会 panic），同时通过路径组装生成日志文件路径扫描日志文件
 
-		StartDay string `mapstructure:"start_day"` // 根据日志文件名字过滤掉日期以前的文件
-		StartSeq int    `mapstructure:"start_seq"` // 根据 seq 信息，过滤掉该日期 seq 以前的文件
+		StartDay string `mapstructure:"start_day"` // 如 2022-12-01，根据日志文件名字过滤掉日期以前的文件
+		StartSeq int64  `mapstructure:"start_seq"` // 根据 seq 信息，过滤掉该日期 seq 以前的文件
 	}
 )
 

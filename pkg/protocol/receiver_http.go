@@ -4,10 +4,9 @@ package protocol
 
 type (
 	ReceiveDataPackage struct {
-		Day         int64    `json:"day"`          // 当前传送数据包裹的日期，防止乱序
+		Day         string   `json:"day"`          // 当前传送数据包裹的日期，防止乱序
 		LeftSeq     int64    `json:"left_seq"`     // 当前传送数据包裹的左序号，防止乱序
 		RightSeq    int64    `json:"right_seq"`    // 当前传送数据包裹的右序号，防止乱序
-		LastSeq     int64    `json:"last_seq"`     // 当前传送数据包裹的最后一个，防止乱序
 		DataPackage [][]byte `json:"data_package"` // 快照序列化的 Data Package 主体 <=> Snapshot list
 	}
 	// JoinRequest exporter 加入，开启采集任务
