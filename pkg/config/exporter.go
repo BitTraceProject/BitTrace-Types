@@ -13,7 +13,7 @@ type (
 		StartDay string `mapstructure:"start_day"` // 如 2022-12-01，根据日志文件名字过滤掉日期以前的文件
 		StartSeq int64  `mapstructure:"start_seq"` // 根据 seq 信息，过滤掉该日期 seq 以前的文件
 
-		PollInterval int64 `mapstructure:"poll_interval"` // 自定义 export 时间间隔，单位为 1ms，默认为 100ms，不宜设置过小
+		PollInterval int `mapstructure:"poll_interval"` // 自定义 export 时间间隔，单位为 1ms，默认为 100ms，不宜设置过小
 	}
 )
 
