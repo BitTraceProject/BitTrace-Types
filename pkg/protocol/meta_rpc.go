@@ -8,45 +8,45 @@ package protocol
 type (
 	// 通用的接口
 
-	// GetKeyArgs 查询 key 是否存在
-	GetKeyArgs struct {
+	// MetaGetKeyArgs 查询 key 是否存在
+	MetaGetKeyArgs struct {
 		Key string `json:"key"`
 	}
-	// GetKeyReply 返回是否，不包括 Value
-	GetKeyReply struct {
+	// MetaGetKeyReply 返回是否，不包括 Value
+	MetaGetKeyReply struct {
 		OK bool `json:"ok"`
 	}
-	// DelKeyArgs 查询 key 是否存在
-	DelKeyArgs struct {
+	// MetaDelKeyArgs 查询 key 是否存在
+	MetaDelKeyArgs struct {
 		Key string `json:"key"`
 	}
-	// DelKeyReply 返回是否，不包括 Value
-	DelKeyReply struct {
+	// MetaDelKeyReply 返回是否，不包括 Value
+	MetaDelKeyReply struct {
 		OK bool `json:"ok"`
 	}
-	// GetValueArgs 返回 Value
-	GetValueArgs struct {
+	// MetaGetValueArgs 返回 Value
+	MetaGetValueArgs struct {
 		Key string `json:"key"`
 	}
-	// GetValueReply 返回 Value 和是否存在
-	GetValueReply struct {
+	// MetaGetValueReply 返回 Value 和是否存在
+	MetaGetValueReply struct {
 		Value string `json:"value"`
 		OK    bool   `json:"ok"`
 	}
-	// SetValueArgs 设置 Value
-	SetValueArgs struct {
+	// MetaSetValueArgs 设置 Value
+	MetaSetValueArgs struct {
 		Key   string `json:"key"`
 		Value string `json:"value"`
 	}
-	// SetValueReply 返回 Value 设置情况，true 代表添加成功，false 更新成功，即 Key 原本已存在
-	SetValueReply struct {
+	// MetaSetValueReply 返回 Value 设置情况，true 代表添加成功，false 更新成功，即 Key 原本已存在
+	MetaSetValueReply struct {
 		OK bool `json:"ok"`
 	}
-	// ClearArgs 清空 meta 信息
-	ClearArgs struct {
+	// MetaClearArgs 清空 meta 信息
+	MetaClearArgs struct {
 	}
-	// ClearReply 返回清空结果
-	ClearReply struct {
+	// MetaClearReply 返回清空结果
+	MetaClearReply struct {
 		OK bool `json:"ok"`
 	}
 )

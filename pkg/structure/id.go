@@ -18,7 +18,7 @@ func GenEventID(chainID string, eventTag string) string {
 }
 
 // GenChainID 根据当前链所处的 fork 的区块高度作为该 chain 的唯一标识，
-// TODO 是否存在不同 fork 高度相同的情况
+// TODO 存在不同 fork 高度相同的情况，需要加以区分
 func GenChainID(forkHeight int32) string {
 	return strconv.FormatInt(int64(forkHeight), 10)
 }

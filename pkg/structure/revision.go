@@ -16,10 +16,10 @@ type (
 		CommitTimestamp Timestamp `json:"commit_timestamp"` // Revision 生效时间，结合 Timestamp 和 CommitTimestamp 确定 Revision 持续时间
 
 		SnapshotID string `json:"snapshot_id"`
-		// EventMap 保存当前 Revision 期间未出结果的 Event
+		// EventQueue 保存当前 Revision 期间未出结果的 Event
 		// chainID + eventTag 可以唯一标识一个 Event，不采用 snapshotID 来标识是因为后续可能 snapshotID 获取困难（height 已经改变，initTimestamp 也无法得知）
 		// chainID 也不能去掉，后续可能有多个 revision 并发进行，需要能够识别出 event 属于哪一个 revision，ReceiveEvent 和 CommitEvent 都会对比 chainID 是否匹配
-		EventMap           map[string]Event  `json:"event_queue"`          // 还没有 result 发生的临时状态迁移，这一部分不被打包，Commit 时会清空
+		EventQueue         map[string]Event  `json:"event_queue"`          // 还没有 result 发生的临时状态迁移，这一部分不被打包，Commit 时会清空
 		StatusTransferList []*StatusTransfer `json:"status_transfer_list"` // result 已经发生了的最终状态迁移
 	}
 )
@@ -30,7 +30,7 @@ func NewRevision(tag Tag, snapshotID string) *Revision {
 		Context:            "",
 		Timestamp:          FromNow(),
 		SnapshotID:         snapshotID,
-		EventMap:           map[string]Event{},
+		EventQueue:         map[string]Event{},
 		StatusTransferList: []*StatusTransfer{},
 	}
 }
@@ -41,11 +41,11 @@ func (r *Revision) ReceiveEvent(chainID string, event Event) bool {
 		return false
 	}
 	eventID := GenEventID(chainID, event.Tag.String())
-	_, ok := r.EventMap[eventID]
+	_, ok := r.EventQueue[eventID]
 	if ok {
 		return false
 	}
-	r.EventMap[eventID] = event
+	r.EventQueue[eventID] = event
 	return true
 }
 
@@ -55,20 +55,20 @@ func (r *Revision) CommitStatusTransfer(trans *StatusTransfer, eventTag Tag) boo
 		return false
 	}
 	eventID := GenEventID(trans.ChainID, eventTag.String())
-	event, ok := r.EventMap[eventID]
+	event, ok := r.EventQueue[eventID]
 	if !ok {
 		return false
 	}
 	trans.RelevantEvent = event
 	r.StatusTransferList = append(r.StatusTransferList, trans)
-	delete(r.EventMap, eventID)
+	delete(r.EventQueue, eventID)
 	return true
 }
 
 // Commit 当前 Revision 生效，需要切换到下一个 Revision
 func (r *Revision) Commit(context string, commitTime time.Time) error {
 	// 判断 event 是否已经清空
-	if len(r.EventMap) > 0 {
+	if len(r.EventQueue) > 0 {
 		// 未清空返回错误
 		return errorx.ErrRevisionNotCommit
 	}
