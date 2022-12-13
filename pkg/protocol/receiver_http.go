@@ -36,7 +36,7 @@ type (
 	}
 	// ReceiverQuitResponse 返回退出结果和相关消息
 	ReceiverQuitResponse struct {
-		OK  bool  `json:"ok"`  // 是否退出成功
-		Msg int64 `json:"msg"` // 中止成功时为 resolver id，失败时为错误信息，未存在、已存在或者已删除
+		OK  bool   `json:"ok"`  // 是否退出成功
+		Msg string `json:"msg"` // 中止成功时为 resolver id，失败时为错误信息，未存在、已存在或者已删除
 	}
 )
