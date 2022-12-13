@@ -15,8 +15,8 @@ type (
 	}
 	// ReceiverJoinResponse 返回加入结果和相关消息
 	ReceiverJoinResponse struct {
-		OK  bool  `json:"ok"`  // 是否加入成功
-		Msg int64 `json:"msg"` // 开启成功时为 resolver id，失败时为错误信息，未存在、已存在或者已删除
+		OK  bool   `json:"ok"`  // 是否加入成功
+		Msg string `json:"msg"` // 开启成功时为 resolver id，失败时为错误信息，未存在、已存在或者已删除
 	}
 	// ReceiverDataRequest 来自 Exporter, 用于上报原始快照数据
 	ReceiverDataRequest struct {
