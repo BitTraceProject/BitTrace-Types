@@ -8,6 +8,7 @@ type (
 		LeftSeq     int64    `json:"left_seq"`     // 当前传送数据包裹的左序号，防止乱序
 		RightSeq    int64    `json:"right_seq"`    // 当前传送数据包裹的右序号，防止乱序
 		DataPackage [][]byte `json:"data_package"` // 快照序列化的 Data Package 主体 <=> Snapshot list
+		EOF         bool     `json:"eof"`
 	}
 	// ReceiverJoinRequest exporter 加入，开启采集任务
 	ReceiverJoinRequest struct {
