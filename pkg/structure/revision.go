@@ -1,8 +1,9 @@
 package structure
 
 import (
-	"github.com/BitTraceProject/BitTrace-Types/pkg/errorx"
 	"time"
+
+	"github.com/BitTraceProject/BitTrace-Types/pkg/errorx"
 )
 
 type (

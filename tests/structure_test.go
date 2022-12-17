@@ -1,9 +1,10 @@
 package tests
 
 import (
-	"github.com/BitTraceProject/BitTrace-Types/pkg/structure"
 	"testing"
 	"time"
+
+	"github.com/BitTraceProject/BitTrace-Types/pkg/structure"
 )
 
 func TestStructure(t *testing.T) {

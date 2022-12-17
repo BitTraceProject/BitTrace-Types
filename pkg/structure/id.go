@@ -1,9 +1,10 @@
 package structure
 
 import (
-	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
 	"strconv"
 	"strings"
+
+	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
 )
 
 func GenSnapshotID(targetChainID string, targetChainHeight int32, initTimestamp Timestamp) string {
