@@ -11,8 +11,7 @@ type (
 		TargetChainHeight int32        `json:"target_chain_height"`
 		Type              SnapshotType `json:"type"`
 		Timestamp         Timestamp    `json:"timestamp"`
-		InitStatus        Status       `json:"init_status"`
-		FinalStatus       Status       `json:"final_status"`  // 这个其实不是必要的，可以用于核对 status transfer list 的操作结果是否正确
+		Status            Status       `json:"init_status"`
 		RevisionList      []Revision   `json:"revision_list"` // 输出的时候不会输出这个，也不会维护它（在结构外维护一个 List），这个是逻辑上的关系（由 resolver 处理得到）
 	}
 	SnapshotType int
@@ -26,22 +25,28 @@ const (
 func InitSnapshot(targetChainID string, targetChainHeight int32, t time.Time, initStatus Status) Snapshot {
 	timestamp := FromTime(t)
 	id := GenSnapshotID(targetChainID, targetChainHeight, timestamp)
-	s := Snapshot{
+	initSnapshot := Snapshot{
 		ID:                id,
 		TargetChainID:     targetChainID,
 		TargetChainHeight: targetChainHeight,
 		Type:              SnapshotInit,
 		Timestamp:         timestamp,
-		InitStatus:        initStatus,
-		RevisionList:      nil,
+		Status:            initStatus,
+		RevisionList:      []Revision{},
 	}
-	return s
+	return initSnapshot
 }
 
-func FinalSnapshot(s Snapshot, t time.Time, finalStatus Status) Snapshot {
+func FinalSnapshot(initSnapshot Snapshot, t time.Time, finalStatus Status) Snapshot {
 	timestamp := FromTime(t)
-	s.Type = SnapshotFinal
-	s.Timestamp = timestamp
-	s.FinalStatus = finalStatus
-	return s
+	finalSnapshot := Snapshot{
+		ID:                initSnapshot.ID,
+		TargetChainID:     initSnapshot.TargetChainID,
+		TargetChainHeight: initSnapshot.TargetChainHeight,
+		Type:              SnapshotFinal,
+		Timestamp:         timestamp,
+		Status:            finalStatus,
+		RevisionList:      initSnapshot.RevisionList,
+	}
+	return finalSnapshot
 }
