@@ -6,7 +6,7 @@ type (
 	// Snapshot 代表一次完整的区块同步流程，主要由一系列的 Revision 组成，
 	// 输出两次，初始化一次，结束一次，之间所有 ID 一致的 Revision 都属于这个 Snapshot
 	Snapshot struct {
-		ID                string       `json:"id"` // chain id + chain height + init timestamp
+		ID                string       `json:"id"` // init timestamp + chain id + chain height
 		TargetChainID     string       `json:"target_chain_id"`
 		TargetChainHeight int32        `json:"target_chain_height"`
 		Type              SnapshotType `json:"type"`
