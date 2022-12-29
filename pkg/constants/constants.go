@@ -10,12 +10,15 @@ const (
 	LOG_TEMP_FILENAME = "temp.log"  // 临时文件的文件名
 	LOG_MAX_LINE      = 10000       // exporter 按数据文件来读取，超出每个数据文件的最大条目数会切换到下一个文件
 
-	EXPORTER_POLL_DEFAULT_INTERVAL       = 100         // 100ms，exporter 定时检查是否新数据文件的间隔，该间隔内的数据会被打包，如果超出最大值，会先拆分再多打包几份
-	EXPORTER_POLL_DEFAULT_INTERVAL_BLOCK = 1000        // 1000ms，exporter 定时检查是否新数据文件的间隔，该间隔内的数据会被打包，如果超出最大值，会先拆分再多打包几份
-	RECEIVE_DATA_PACKAGE_MAXSIZE         = 1000 * 1000 // 1000KBi，将 exporter 的数据打包，不得超过此最大值，暂时没用到
-	RECEIVE_DATA_PACKAGE_MAXN            = 10 * 1000   // 10KBi条 snapshot，将 exporter 的数据打包，不得超过此最大值
+	EXPORTER_POLL_DEFAULT_INTERVAL       = 100  // 100ms，exporter 定时检查是否新数据文件的间隔，该间隔内的数据会被打包，如果超出最大值，会先拆分再多打包几份
+	EXPORTER_POLL_DEFAULT_INTERVAL_BLOCK = 1000 // 1000ms，exporter 定时检查是否新数据文件的间隔，该间隔内的数据会被打包，如果超出最大值，会先拆分再多打包几份
+
+	RECEIVE_DATA_PACKAGE_MAXSIZE = 1000 * 1000 // 1000KBi，将 exporter 的数据打包，不得超过此最大值，暂时没用到
+	RECEIVE_DATA_PACKAGE_MAXN    = 10 * 1000   // 10KBi条 snapshot，将 exporter 的数据打包，不得超过此最大值
 
 	MQ_CONSUME_INTERVAL = 300 * time.Millisecond // 300ms
+
+	RESOLVER_SNAPSHOTPAIR_STREAM_SIZE = 300 // resolver handler 处 snapshot pair stream 的大小
 
 	TIME_LAYOUT_DAY = "2006-01-02" // day 时间格式
 
