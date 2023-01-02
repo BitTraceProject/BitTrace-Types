@@ -12,7 +12,7 @@ type (
 		Type              SnapshotType `json:"type"`
 		Timestamp         Timestamp    `json:"timestamp"`
 		Status            *Status      `json:"status"`
-		RevisionList      []Revision   `json:"revision_list"` // 输出的时候不会输出这个，也不会维护它（在结构外维护一个 List），这个是逻辑上的关系（由 resolver 处理得到）
+		RevisionList      []*Revision  `json:"revision_list"` // 输出的时候不会输出这个，也不会维护它（在结构外维护一个 List），这个是逻辑上的关系（由 resolver 处理得到）
 	}
 	SnapshotType int
 )
@@ -32,7 +32,7 @@ func InitSnapshot(targetChainID string, targetChainHeight int32, t time.Time, in
 		Type:              SnapshotInit,
 		Timestamp:         timestamp,
 		Status:            initStatus,
-		RevisionList:      []Revision{},
+		RevisionList:      []*Revision{},
 	}
 	return initSnapshot
 }
