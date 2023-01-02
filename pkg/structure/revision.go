@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"sync"
 	"time"
 
 	"github.com/BitTraceProject/BitTrace-Types/pkg/errorx"
@@ -10,7 +11,10 @@ type (
 	// Revision 代表一个区块同步过程中的某一个阶段结束，
 	// 同一个 Snapshot 期间，每一个过程结束时输出一次，
 	// Revision 将多个 Status 迁移，Event，Result 等打包输出
+	// TODO 并发支持改造
 	Revision struct {
+		sync.Mutex
+
 		Tag             Tag       `json:"tag"`
 		Context         string    `json:"context"` // Revision 生效时设置
 		Timestamp       Timestamp `json:"timestamp"`
@@ -38,6 +42,9 @@ func NewRevision(tag Tag, snapshotID string) *Revision {
 
 // ReceiveEvent 此时 event 对应的 result 还未发生，event 到达了 revision，放入 map
 func (r *Revision) ReceiveEvent(chainID string, event Event) bool {
+	r.Lock()
+	defer r.Unlock()
+
 	if chainID != ParseChainIDFromSnapshotID(r.SnapshotID) {
 		return false
 	}
@@ -52,6 +59,9 @@ func (r *Revision) ReceiveEvent(chainID string, event Event) bool {
 
 // CommitStatusTransfer 某一 event 对应的 result 已经发生了后调用的，将 event 与 result 关联起来，然后将当前的 transfer 添加到 transfer list
 func (r *Revision) CommitStatusTransfer(trans *StatusTransfer, eventTag Tag) bool {
+	r.Lock()
+	defer r.Unlock()
+
 	if trans.ChainID != ParseChainIDFromSnapshotID(r.SnapshotID) {
 		return false
 	}
@@ -68,6 +78,9 @@ func (r *Revision) CommitStatusTransfer(trans *StatusTransfer, eventTag Tag) boo
 
 // Commit 当前 Revision 生效，需要切换到下一个 Revision
 func (r *Revision) Commit(context string, commitTime time.Time) error {
+	r.Lock()
+	defer r.Unlock()
+	
 	// 判断 event 是否已经清空
 	if len(r.EventQueue) > 0 {
 		// 未清空返回错误
