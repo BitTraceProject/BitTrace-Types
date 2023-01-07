@@ -15,10 +15,6 @@ func GenSnapshotID(targetChainID string, targetChainHeight int32, initTimestamp 
 	}, constants.ID_SEP_SYMBOL)
 }
 
-func GenEventID(chainID string, eventTag string) string {
-	return strings.Join([]string{chainID, eventTag}, constants.ID_SEP_SYMBOL)
-}
-
 // GenChainID 根据当前链所处的 fork 的区块高度作为该 chain 的唯一标识，
 // TODO 存在不同 fork 高度相同的情况，需要加以区分
 func GenChainID(forkHeight int32) string {

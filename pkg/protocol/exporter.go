@@ -9,7 +9,6 @@ type (
 
 const (
 	DataTypeSnapshot ExporterDataType = iota
-	DataTypeRevision
 	DataTypeStatus
 	DataTypeStatusTransfer
 )
