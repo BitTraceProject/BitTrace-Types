@@ -16,10 +16,14 @@ const (
 
 func NewExporterData(data []byte, dataType ExporterDataType) *ExporterData {
 	return &ExporterData{
-		DataWithType: append(data, dataType.AsByte()),
+		DataWithType: append(data, dataType.Byte()),
 	}
 }
 
-func (t ExporterDataType) AsByte() byte {
+func (d ExporterData) Data() []byte {
+	return d.DataWithType
+}
+
+func (t ExporterDataType) Byte() byte {
 	return byte(t)
 }
