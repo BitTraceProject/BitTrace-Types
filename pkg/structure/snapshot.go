@@ -11,7 +11,6 @@ type (
 		TargetChainHeight int32        `json:"target_chain_height"`
 		Type              SnapshotType `json:"type"`
 		Timestamp         Timestamp    `json:"timestamp"`
-		WorldStatus       *WorldStatus `json:"world_status"`
 		RevisionList      []*Revision  `json:"revision_list"`
 	}
 	SnapshotType int
@@ -22,7 +21,7 @@ const (
 	SnapshotFinal
 )
 
-func InitSnapshot(targetChainID string, targetChainHeight int32, t time.Time, initWorldStatus *WorldStatus) Snapshot {
+func InitSnapshot(targetChainID string, targetChainHeight int32, t time.Time) Snapshot {
 	timestamp := FromTime(t)
 	id := GenSnapshotID(targetChainID, targetChainHeight, timestamp)
 	initSnapshot := Snapshot{
@@ -31,13 +30,12 @@ func InitSnapshot(targetChainID string, targetChainHeight int32, t time.Time, in
 		TargetChainHeight: targetChainHeight,
 		Type:              SnapshotInit,
 		Timestamp:         timestamp,
-		WorldStatus:       initWorldStatus,
 		RevisionList:      []*Revision{},
 	}
 	return initSnapshot
 }
 
-func FinalSnapshot(initSnapshot Snapshot, t time.Time, finalWorldStatus *WorldStatus) Snapshot {
+func FinalSnapshot(initSnapshot Snapshot, t time.Time) Snapshot {
 	timestamp := FromTime(t)
 	finalSnapshot := Snapshot{
 		ID:                initSnapshot.ID,
@@ -45,7 +43,6 @@ func FinalSnapshot(initSnapshot Snapshot, t time.Time, finalWorldStatus *WorldSt
 		TargetChainHeight: initSnapshot.TargetChainHeight,
 		Type:              SnapshotFinal,
 		Timestamp:         timestamp,
-		WorldStatus:       finalWorldStatus,
 		RevisionList:      initSnapshot.RevisionList,
 	}
 	return finalSnapshot
