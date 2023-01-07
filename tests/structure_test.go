@@ -9,8 +9,8 @@ import (
 
 func TestStructure(t *testing.T) {
 	now := time.Now()
-	initSnapshot := structure.InitSnapshot("1", 0, now, structure.NewStatus(nil, nil))
-	finalSnapshot := structure.FinalSnapshot(initSnapshot, now.Add(time.Second*3), structure.NewStatus(nil, nil))
+	initSnapshot := structure.InitSnapshot("1", 0, now, nil)
+	finalSnapshot := structure.FinalSnapshot(initSnapshot, now.Add(time.Second*3), nil)
 	t.Log(finalSnapshot)
 }
 

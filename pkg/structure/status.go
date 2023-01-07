@@ -7,6 +7,8 @@ import (
 
 type (
 	// Status 维护了已存在的 MainChain 和 SideChain 的 WorldStatus，支持一系列管理操作，只需传值
+	// init status 在 btcd 启动时同步前会输出一次，之后 resolver 与 btcd 通过 st 来同步 status
+	// 在 btcd 中包装一下，然后维护全局的 status，revision 期间，传入 st 来更新它，并且 logger 输出 st (st 中会实时刷新 ws，因为 ws 可能在在其他并发过程中也发生改变)
 	Status struct {
 		sync.RWMutex
 
@@ -18,7 +20,12 @@ type (
 	// Revision 只能记录它本身造成的 StatusTransfer，从局部的 Revision 不一定推出完整的 StatusTransfer，
 	// 所以在处理数据时，需要将当前 Revision 时间范围内的所有 OP （可能来自多个 Revision）按照 Result 的时间戳串行化排序，来从 initStatus 推导出 finalStatus
 	StatusTransfer struct {
-		ChainID string `json:"chain_id"` // 唯一标识当前状态迁移针对的哪一个链
+		// 最新的 st 生效前的 ws
+		FinalWorldStatus *WorldStatus // 该 chain id 的最新 ws，可能为 nil（OP = AddSideChain）
+
+		// 描述性信息
+		ChainID string          `json:"chain_id"` // 唯一标识当前状态迁移针对的哪一个链
+		OP      TransferOperate `json:"op"`       // 操作类型
 
 		// 状态相关变更
 		FieldName     string      `json:"field_name"`      // 操作的目标 Field，也可以通过 reflect 获取 field
@@ -27,17 +34,11 @@ type (
 
 		// 链相关变更
 		ChainNewWorldStatus *WorldStatus `json:"chain_new_world_status"` // 新的 worldstatus
-		RemoveOldMainChain  bool         `json:"remove_old_main_chain"`  // 是否移除旧 mainchain
-
-		// 描述性信息
-		OP       TransferOperate `json:"op"`        // 操作类型
-		OPDetail string          `json:"op_detail"` // 操作的具体内容，根据 OP 还原出操作
+		RemoveOldMainChain  bool         `json:"remove_old_main_chain"`  // 是否移除旧 mainchain（ChainID 对应的那个主链）
 
 		// 关联性信息
 		RelevantSnapshotID  string `json:"relevant_snapshot_id"`
 		RelevantRevisionTag string `json:"relevant_revision_tag"`
-		RelevantEvent       Event  `json:"relevant_event"`  // 状态迁移所关联的事件，事件发生会导致结果
-		RelevantResult      Result `json:"relevant_result"` // 事件对应的结果，这个结果才最终会导致状态的迁移
 	}
 	// WorldStatus 是各种自定义标准化属性的集合，传指针
 	WorldStatus struct {
@@ -163,11 +164,11 @@ func (s *Status) Transfer(trans *StatusTransfer) bool {
 
 	chainID := trans.ChainID
 	if chainID == s.MainChainWorldStatus.ChainID {
-		s.MainChainWorldStatus.Transfer(trans)
+		s.MainChainWorldStatus.transfer(trans)
 		return true
 	}
 	if sideChainWorldStatus, ok := s.SideChainWorldStatusMap[chainID]; ok {
-		sideChainWorldStatus.Transfer(trans)
+		sideChainWorldStatus.transfer(trans)
 	}
 	return false
 }
@@ -184,7 +185,7 @@ func NewWorldStatus(forkHeight int32, bits int64, totalTxn int64, nextMedianTime
 	return s
 }
 
-func (ws *WorldStatus) Transfer(trans *StatusTransfer) {
+func (ws *WorldStatus) transfer(trans *StatusTransfer) {
 	if trans.OP == NoneOperate || (trans.OP != ResetField && trans.OP != SwapField) || trans.FieldName == "" {
 		return
 	}
