@@ -7,7 +7,6 @@ import (
 
 type (
 	// Status 维护了已存在的 MainChain 和 SideChain 的 WorldStatus，支持一系列管理操作，只需传值
-	// TODO 并发支持改造
 	Status struct {
 		sync.RWMutex
 
@@ -19,12 +18,26 @@ type (
 	// Revision 只能记录它本身造成的 StatusTransfer，从局部的 Revision 不一定推出完整的 StatusTransfer，
 	// 所以在处理数据时，需要将当前 Revision 时间范围内的所有 OP （可能来自多个 Revision）按照 Result 的时间戳串行化排序，来从 initStatus 推导出 finalStatus
 	StatusTransfer struct {
-		ChainID        string          `json:"chain_id"`        // 唯一标识当前状态迁移针对的哪一个链
-		FieldName      string          `json:"field_name"`      // 操作的目标 Field，也可以通过 reflect 获取 field
-		OP             TransferOperate `json:"op"`              // 操作类型
-		OPDetail       string          `json:"op_detail"`       // 操作的具体内容，根据 OP 还原出操作
-		RelevantEvent  Event           `json:"relevant_event"`  // 状态迁移所关联的事件，事件发生会导致结果
-		RelevantResult Result          `json:"relevant_result"` // 事件对应的结果，这个结果才最终会导致状态的迁移
+		ChainID string `json:"chain_id"` // 唯一标识当前状态迁移针对的哪一个链
+
+		// 状态相关变更
+		FieldName     string      `json:"field_name"`      // 操作的目标 Field，也可以通过 reflect 获取 field
+		FieldNewValue interface{} `json:"field_new_value"` // 新的值
+		FieldOldValue interface{} `json:"field_old_value"` // 在完成 field 修改前，重新从网络中获取到的旧的值，可用于双向的核对
+
+		// 链相关变更
+		ChainNewWorldStatus *WorldStatus `json:"chain_new_world_status"` // 新的 worldstatus
+		RemoveOldMainChain  bool         `json:"remove_old_main_chain"`  // 是否移除旧 mainchain
+
+		// 描述性信息
+		OP       TransferOperate `json:"op"`        // 操作类型
+		OPDetail string          `json:"op_detail"` // 操作的具体内容，根据 OP 还原出操作
+
+		// 关联性信息
+		RelevantSnapshotID  string `json:"relevant_snapshot_id"`
+		RelevantRevisionTag string `json:"relevant_revision_tag"`
+		RelevantEvent       Event  `json:"relevant_event"`  // 状态迁移所关联的事件，事件发生会导致结果
+		RelevantResult      Result `json:"relevant_result"` // 事件对应的结果，这个结果才最终会导致状态的迁移
 	}
 	// WorldStatus 是各种自定义标准化属性的集合，传指针
 	WorldStatus struct {
@@ -38,14 +51,13 @@ type (
 )
 
 const (
-	Reset TransferOperate = iota // reset one field
-	Swap                         // swap all field
-	None  = -1                   // no operate
-)
-
-var (
-	bwsMux          sync.RWMutex
-	bestWorldStatus *WorldStatus
+	ResetField      TransferOperate = iota // 重置单个 field
+	SwapField                              // 替换所有 field，适合改变多个 field 的情况（也可使用多次 reset 的方法代替）
+	AddSideChain                           // 添加一个 sidechain
+	RemoveSideChain                        // 移除一个 sidechain
+	ResetMainChain                         // 重置 mainchain，新的 mainchain 可能是新的 chain 也可能是 sidechain，旧 mainchain 直接删除
+	SwapMainChain                          // 重置 mainchain，新的 mainchain 可能是新的 chain 也可能是 sidechain，旧 mainchain 变为 sidechain
+	NoneOperate     = -1                   // no operate
 )
 
 // NewStatus 初始化当前的状态
@@ -78,7 +90,7 @@ func (s *Status) IsSideChain(chainID string) bool {
 }
 
 // AddSideChain 添加一个侧链，如果待添加的链已经是主链返回 false，不进行任何操作，否则直接替换或者添加
-func (s *Status) AddSideChain(sideChainWorldStatus *WorldStatus) bool {
+func (s *Status) addSideChain(sideChainWorldStatus *WorldStatus) bool {
 	s.Lock()
 	defer s.Unlock()
 
@@ -93,7 +105,7 @@ func (s *Status) AddSideChain(sideChainWorldStatus *WorldStatus) bool {
 }
 
 // RemoveSideChain 移除一个侧链，如果待移除的链已经是主链返回 false，不进行任何操作，否则直接移除
-func (s *Status) RemoveSideChain(chainID string) bool {
+func (s *Status) removeSideChain(chainID string) bool {
 	s.Lock()
 	defer s.Unlock()
 
@@ -107,20 +119,20 @@ func (s *Status) RemoveSideChain(chainID string) bool {
 }
 
 // ResetMainChain 重新设置主链，如果新的主链原来是侧链，则先删除，然后直接设置（不考虑将旧主链设为侧链）
-func (s *Status) ResetMainChain(newMainChainWorldStatus *WorldStatus) {
+func (s *Status) resetMainChain(newMainChainWorldStatus *WorldStatus) {
 	s.Lock()
 	defer s.Unlock()
 
 	chainID := newMainChainWorldStatus.ChainID
 	if s.IsSideChain(chainID) {
 		// 如果待交换的 chain 是 side chain 则先删除
-		s.RemoveSideChain(chainID)
+		s.removeSideChain(chainID)
 	}
 	s.MainChainWorldStatus = newMainChainWorldStatus
 }
 
 // SwapMainChain 重新设置主链，并将旧主链设为侧链，如果新的主链原来是侧链，则先删除。如果新主链已经是主链，返回 false，什么都不做
-func (s *Status) SwapMainChain(newMainChainWorldStatus *WorldStatus, removeOldMainChain bool) bool {
+func (s *Status) swapMainChain(newMainChainWorldStatus *WorldStatus, removeOldMainChain bool) bool {
 	s.Lock()
 	defer s.Unlock()
 
@@ -131,7 +143,7 @@ func (s *Status) SwapMainChain(newMainChainWorldStatus *WorldStatus, removeOldMa
 	}
 	if s.IsSideChain(chainID) {
 		// 如果待交换的 chain 是 side chain 则先删除
-		s.RemoveSideChain(chainID)
+		s.removeSideChain(chainID)
 	}
 	oldMainChainWorldStatus := s.MainChainWorldStatus
 	// 替换
@@ -144,6 +156,7 @@ func (s *Status) SwapMainChain(newMainChainWorldStatus *WorldStatus, removeOldMa
 }
 
 // Transfer 更新一次世界状态
+// TODO chain 相关操作支持
 func (s *Status) Transfer(trans *StatusTransfer) bool {
 	s.RLock()
 	defer s.RUnlock()
@@ -159,17 +172,6 @@ func (s *Status) Transfer(trans *StatusTransfer) bool {
 	return false
 }
 
-// NewStatusTransfer 状态迁移是面向 Result 的，NewStatusTransfer 时还没法确认是哪一个 Event 导致的该 Result（由 Revision 维护）
-func NewStatusTransfer(result Result, chainID string, fieldName string, op TransferOperate, opDetail string) *StatusTransfer {
-	return &StatusTransfer{
-		ChainID:        chainID,
-		FieldName:      fieldName,
-		OP:             op,
-		OPDetail:       opDetail,
-		RelevantResult: result,
-	}
-}
-
 func NewWorldStatus(forkHeight int32, bits int64, totalTxn int64, nextMedianTime time.Time) WorldStatus {
 	chainID := GenChainID(forkHeight)
 	s := WorldStatus{
@@ -182,24 +184,10 @@ func NewWorldStatus(forkHeight int32, bits int64, totalTxn int64, nextMedianTime
 	return s
 }
 
-// BestWorldStatus 并发获取 bestWorldStatus
-func BestWorldStatus() WorldStatus {
-	bwsMux.RLock()
-	defer bwsMux.RUnlock()
-	ws := *bestWorldStatus
-	return ws
-}
-
-// RefreshBestWorldStatus 并发刷新 bestWorldStatus，
-// 也可以选择额外维护一个 worldStatus，通过串行化的调用 Transfer 做更新，
-// bestWorldStatus 和 worldStatus 可以互相对比
-func RefreshBestWorldStatus(worldStatus *WorldStatus) {
-	bwsMux.Lock()
-	defer bwsMux.Unlock()
-	bestWorldStatus = worldStatus
-}
-
 func (ws *WorldStatus) Transfer(trans *StatusTransfer) {
-	// TODO 根据 fieldName, op 和 opDetail 修改状态
+	if trans.OP == NoneOperate || (trans.OP != ResetField && trans.OP != SwapField) || trans.FieldName == "" {
+		return
+	}
+	// TODO 根据 st 中 field 相关的信息改状态
 
 }
