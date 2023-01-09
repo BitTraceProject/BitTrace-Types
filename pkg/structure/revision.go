@@ -23,7 +23,17 @@ type (
 	}
 	RevisionDataBlockVerify struct {
 	}
+	RevisionDataChainVerify struct {
+	}
+	RevisionDataOrphanProcess struct {
+	}
 	RevisionDataOrphanExtend struct {
+	}
+	RevisionDataMainChainExtend struct {
+	}
+	RevisionDataSideChainExtend struct {
+	}
+	RevisionDataChainSwap struct {
 	}
 	// ......
 )
