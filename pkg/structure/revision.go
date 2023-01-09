@@ -32,7 +32,13 @@ type (
 const (
 	RevisionTypeBlockReceive RevisionType = iota
 	RevisionTypeBlockVerify
+	RevisionTypeChainVerify
+	RevisionTypeOrphanProcess
 	RevisionTypeOrphanExtend
+	RevisionTypeMainChainExtend
+	RevisionTypeSideChainExtend
+	RevisionTypeChainSwap
+
 	RevisionTypeUnknown
 	// ......
 )
