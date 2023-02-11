@@ -1,0 +1,11 @@
+---
+version: 3.0
+
+meta_server_addr: "localhost:8081"
+resolver_config:
+  meta_server_addr: "localhost:8081"
+  mq_server_addr: "localhost:8082"
+  database_config: # master
+    address: "localhost:33061"
+    username: "root" # 暂时使用 root
+    password: "admin"

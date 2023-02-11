@@ -1,0 +1,7 @@
+---
+version: 3.0
+
+exporter_tag: "peer10.btcd.testnet0"
+receiver_server_addr: "localhost:8080"
+poll_interval: 100
+file_keeping_days: 30
