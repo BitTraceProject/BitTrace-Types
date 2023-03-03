@@ -2,6 +2,7 @@ package tests
 
 import (
 	"github.com/BitTraceProject/BitTrace-Types/pkg/common"
+	"github.com/BitTraceProject/BitTrace-Types/pkg/structure"
 	"testing"
 
 	"github.com/BitTraceProject/BitTrace-Types/pkg/config"
@@ -46,6 +47,7 @@ func TestCreateTable(t *testing.T) {
 		TableNameSnapshotSync: "table_snapshot_sync_exporter.test",
 		TableNameState:        "table_state_exporter.test",
 		TableNameRevision:     "table_revision_exporter.test",
+		TableNameEventOrphan:  "table_event_orphan_exporter.test",
 	}
 
 	sqlList := []string{
@@ -53,6 +55,7 @@ func TestCreateTable(t *testing.T) {
 		database.SqlCreateTableSnapshotSync(table.TableNameSnapshotSync),
 		database.SqlCreateTableState(table.TableNameState),
 		database.SqlCreateTableRevision(table.TableNameRevision),
+		database.SqlCreateTableEventOrphan(table.TableNameEventOrphan),
 	}
 	t.Log(sqlList)
 	dbInst, err = database.TryExecPipelineSql(dbInst, sqlList, dbConf)
@@ -90,7 +93,7 @@ func TestInsert(t *testing.T) {
 		{
 			SnapshotID:      "1676038828881628593-0-541458",
 			SnapshotType:    2,
-			HashStr:         "00000000000000000000f997e373cf36f6cdc1e460508c4c27cd64691ba25bce",
+			BestBlockHash:   "00000000000000000000f997e373cf36f6cdc1e460508c4c27cd64691ba25bce",
 			Height:          541458,
 			Bits:            0,
 			BlockSize:       0,
@@ -114,14 +117,29 @@ func TestInsert(t *testing.T) {
 			RevisionType:   0,
 			InitTimestamp:  "1676038828881628593",
 			FinalTimestamp: "",
-			InitData:       "",
+			InitData:       common.StructToJsonStr(nil),
 			FinalData:      common.StructToJsonStr(stateList[0]),
+		},
+	}
+	eventOrphanList := []database.TableEventOrphan{
+		{
+			SnapshotID:           "1676038806838405298-0-541457",
+			EventTypeOrphan:      int(structure.EventTypeOrphanConnect),
+			OrphanBlockHash:      "0xsss",
+			EventOrphanTimestamp: "",
+		},
+		{
+			SnapshotID:           "1676038828881628593-0-541458",
+			EventTypeOrphan:      int(structure.EventTypeOrphanDiscard),
+			OrphanBlockHash:      "0xzzz",
+			EventOrphanTimestamp: "",
 		},
 	}
 	sqlList := []string{
 		database.SqlInsertRevision("table_revision_exporter.test", revisionList...),
 		database.SqlInsertSnapshotSync("table_snapshot_sync_exporter.test", snapshotSyncList...),
 		database.SqlInsertState("table_state_exporter.test", stateList...),
+		database.SqlInsertOrphanEvent("table_event_orphan_exporter.test", eventOrphanList...),
 	}
 	t.Log(sqlList)
 	dbInst, err = database.TryExecPipelineSql(dbInst, sqlList, dbConf)

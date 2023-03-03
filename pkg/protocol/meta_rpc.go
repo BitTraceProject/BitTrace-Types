@@ -34,6 +34,7 @@ type (
 		TableNameSnapshotSync string `json:"table_name_snapshot_sync"`
 		TableNameState        string `json:"table_name_state"`
 		TableNameRevision     string `json:"table_name_revision"`
+		TableNameEventOrphan  string `json:"table_name_event_orphan"`
 	}
 	ExporterStatusCode int
 

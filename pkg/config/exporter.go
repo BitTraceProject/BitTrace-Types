@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
+	"github.com/BitTraceProject/BitTrace-Types/pkg/protocol"
 )
 
 type (
@@ -13,6 +14,8 @@ type (
 		PollInterval int `mapstructure:"poll_interval"` // 自定义 export 时间间隔，单位为 1ms，默认为 100ms，不宜设置过小
 
 		FileKeepingDays int `mapstructure:"file_keeping_days"` // 已上报的日志，保留多久后会被删除
+
+		InitProgress protocol.ExporterProgress `mapstructure:"init_progress"`
 	}
 )
 

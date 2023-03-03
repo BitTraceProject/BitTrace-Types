@@ -109,3 +109,7 @@ func GenStateTableName(exporterTag string, timestamp Timestamp) string {
 func GenRevisionTableName(exporterTag string, timestamp Timestamp) string {
 	return strings.Join([]string{constants.TABLE_REVISION_PREFIX, exporterTag, timestamp.String()}, constants.DEFAULT_SEP_SYMBOL)
 }
+
+func GenEventOrphanTableName(exporterTag string, timestamp Timestamp) string {
+	return strings.Join([]string{constants.TABLE_EVENT_ORPHAN_PREFIX, exporterTag, timestamp.String()}, constants.DEFAULT_SEP_SYMBOL)
+}

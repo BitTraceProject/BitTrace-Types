@@ -5,3 +5,7 @@ exporter_tag: "peer10.btcd.testnet0"
 receiver_server_addr: "localhost:8080"
 poll_interval: 100
 file_keeping_days: 30
+init_progress:
+  current_n:
+  current_file_id:
+  current_day:
