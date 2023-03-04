@@ -38,11 +38,13 @@ type (
 
 		Version        int32  `json:"version"`
 		Bits           uint32 `json:"bits"`
+		WorkSum        string `json:"work_sum"`
 		MerkleRootHash string `json:"merkle_root_hash"`
 		Nonce          uint32 `json:"nonce"`
 	}
 	RevisionDataBlockVerifyFinal struct {
-		OK bool `json:"ok"`
+		OK     bool   `json:"ok"`
+		Result string `json:"result"`
 	}
 	RevisionDataOrphanProcessInit struct {
 	}
@@ -53,22 +55,23 @@ type (
 	RevisionDataOrphanExtendFinal struct {
 	}
 	RevisionDataMainChainExtendInit struct {
+		BlockHash string `json:"block_hash"`
 	}
 	RevisionDataMainChainExtendFinal struct {
+		OK bool `json:"ok"`
 	}
 	RevisionDataSideChainExtendInit struct {
 		ForkParentBlockHash string `json:"fork_parent_block_hash"`
 	}
 	RevisionDataSideChainExtendFinal struct {
 		ForkBlockHash string `json:"fork_block_hash"`
-
-		OK bool `json:"ok"`
+		IsExtend      bool   `json:"is_extend"`
 	}
 	RevisionDataChainSwapInit struct {
 		OldBestBlockHash string `json:"old_best_block_hash"`
-		NewBestBlockHash string `json:"new_best_block_hash"`
 	}
 	RevisionDataChainSwapFinal struct {
+		NewBestBlockHash    string `json:"new_best_block_hash"`
 		ForkParentBlockHash string `json:"fork_parent_block_hash"`
 		ForkBlockHash       string `json:"fork_block_hash"`
 
