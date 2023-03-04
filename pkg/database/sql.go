@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS %s (
   snapshot_id varchar(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   target_chain_id int NOT NULL,
   target_chain_height int NOT NULL,
-  block_hash varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  block_hash varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   is_orphan tinyint(1) NOT NULL,
   init_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   final_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS %s (
 CREATE TABLE IF NOT EXISTS %s (
   snapshot_id varchar(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   event_type_orphan tinyint(1) NOT NULL,
-  orphan_block_hash varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  orphan_block_hash varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   event_orphan_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY(snapshot_id,event_type_orphan),
   INDEX index_orphan_block_hash(orphan_block_hash)
