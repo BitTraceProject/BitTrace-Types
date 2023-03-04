@@ -18,10 +18,8 @@ type (
 
 		FinalTimestamp common.Timestamp `json:"final_timestamp"` // Revision 生效时间，结合 Timestamp 和 CommitTimestamp 确定 Revision 持续时间
 		FinalData      RevisionData     `json:"final_data"`      // 根据 Tag 不同获取不同的数据，在 Revision 结束时输出
-		NextRevision   RevisionType     `json:"next_revision"`
 	}
 	RevisionType int
-	// TODO revision data default
 
 	RevisionData interface{}
 
@@ -87,12 +85,12 @@ type (
 const (
 	RevisionTypeBlockReceive RevisionType = iota
 	RevisionTypeBlockVerify
-	RevisionTypeChainVerify
 	RevisionTypeOrphanProcess
 	RevisionTypeOrphanExtend
 	RevisionTypeMainChainExtend
 	RevisionTypeSideChainExtend
 	RevisionTypeChainSwap
+	RevisionTypeChainVerify
 
 	RevisionTypeUnknown
 	// ......

@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Timestamp 是 19 位长，精确到纳秒的时间戳
 type (
 	Timestamp int64
 )

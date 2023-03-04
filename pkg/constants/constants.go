@@ -12,7 +12,7 @@ const (
 	LOGGER_SYNC_HEIGHT_INTERVAL = 500         // 每隔 500 左右的区块写入一次同步标记，同步较慢时，还需要其他机制，来保证每一天至少写入一条同步标记
 	LOGGER_FILE_BASE_PATH       = "/root/" + BITTRACE_ROOT_DIR + "/" + BITTRACE_LOG_DIR
 
-	ORPHAN_CHAIN_ID = "-1"
+	ORPHAN_CHAIN_ID = "-1" // 如果当前区块同步过程中的区块被处理成区块，则将其 ChainID 设为 -1
 
 	EXPORTER_MAX_TAG_LENGTH                 = 30      // 受 table name 最长为 64 的限制
 	EXPORTER_POLL_DEFAULT_INTERVAL          = 100     // 100ms，exporter 定时检查是否新数据文件的间隔，该间隔内的数据会被打包，如果超出最大值，会先拆分再多打包几份

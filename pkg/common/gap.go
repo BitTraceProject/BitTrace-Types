@@ -9,9 +9,9 @@ import (
 	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
 )
 
-// gap: Generate and Parse
+// gap: Generate and Parse，包括各组件中 ID、Name 等的生成和解析
 
-// btcd
+// btcd gap
 
 func GenSnapshotID(targetChainID string, targetChainHeight int32, initTimestamp Timestamp) string {
 	return strings.Join([]string{
@@ -35,7 +35,7 @@ func ParseChainIDFromSnapshotID(snapshotID string) string {
 	return segs[1]
 }
 
-// exporter
+// exporter gap
 
 func GenLogFilename(id int64) string {
 	return strconv.FormatInt(id, 10) + ".log"
@@ -75,7 +75,7 @@ func CatchUpFileID(loggerName, currentDay string) (int64, int64, error) {
 	return currentFileID, currentN, nil
 }
 
-// receiver
+// receiver gap
 
 func GenExporterInfoKey(exporterTag string) string {
 	return strings.Join([]string{exporterTag, "info"}, constants.DEFAULT_SEP_SYMBOL)
@@ -86,13 +86,13 @@ func ParseExporterTagFromExporterInfoKey(exporterInfoKey string) string {
 	return exporterTag
 }
 
-// resolver
+// resolver gap
 
 func GenResolverTag(exporterTag string) string {
 	return strings.Join([]string{"resolver", exporterTag}, constants.DEFAULT_SEP_SYMBOL)
 }
 
-// collector
+// collector gap
 
 func GenSnapshotDataTableName(exporterTag string, timestamp Timestamp) string {
 	return strings.Join([]string{constants.TABLE_SNAPSHOT_DATA_PREFIX, exporterTag, timestamp.String()}, constants.DEFAULT_SEP_SYMBOL)
