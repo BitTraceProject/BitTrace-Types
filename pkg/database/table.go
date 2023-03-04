@@ -6,7 +6,7 @@ type (
 		TargetChainID     string `json:"target_chain_id"`
 		TargetChainHeight int32  `json:"target_chain_height"`
 		BlockHash         string `json:"block_hash"`
-		IsOrphan          bool   `json:"is_orphan"`
+		IsOrphan          int    `json:"is_orphan"`
 		InitTimestamp     string `json:"init_timestamp"`
 		FinalTimestamp    string `json:"final_timestamp"`
 	}

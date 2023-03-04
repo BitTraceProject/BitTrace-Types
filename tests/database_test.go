@@ -135,11 +135,23 @@ func TestInsert(t *testing.T) {
 			EventOrphanTimestamp: "",
 		},
 	}
+	snapshotDataList := []database.TableSnapshotData{
+		database.TableSnapshotData{
+			SnapshotID:        "11111",
+			TargetChainID:     "1",
+			TargetChainHeight: 0,
+			BlockHash:         "",
+			IsOrphan:          1,
+			InitTimestamp:     "1",
+			FinalTimestamp:    "1",
+		},
+	}
 	sqlList := []string{
 		database.SqlInsertRevision("table_revision_exporter.test", revisionList...),
 		database.SqlInsertSnapshotSync("table_snapshot_sync_exporter.test", snapshotSyncList...),
 		database.SqlInsertState("table_state_exporter.test", stateList...),
 		database.SqlInsertOrphanEvent("table_event_orphan_exporter.test", eventOrphanList...),
+		database.SqlInsertSnapshotData("table_snapshot_data_exporter.test", snapshotDataList...),
 	}
 	t.Log(sqlList)
 	dbInst, err = database.TryExecPipelineSql(dbInst, sqlList, dbConf)

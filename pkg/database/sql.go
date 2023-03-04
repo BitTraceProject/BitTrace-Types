@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS %s (
   target_chain_id int NOT NULL,
   target_chain_height int NOT NULL,
   block_hash varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  is_orphan bool NOT NULL,
+  is_orphan tinyint(1) NOT NULL,
   init_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   final_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY(snapshot_id),
@@ -98,7 +98,8 @@ func SqlInsertSnapshotData(tableName string, snapshotData ...TableSnapshotData) 
 	fields := "snapshot_id,target_chain_id,target_chain_height,block_hash,is_orphan,init_timestamp,final_timestamp"
 	values := make([]string, len(snapshotData))
 	for i, data := range snapshotData {
-		value := fmt.Sprintf("('%s','%s',%d,'%s','%v','%s','%s')",
+
+		value := fmt.Sprintf("('%s','%s',%d,'%s','%d','%s','%s')",
 			data.SnapshotID,
 			data.TargetChainID,
 			data.TargetChainHeight,
