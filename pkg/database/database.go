@@ -4,6 +4,7 @@ import (
 	"github.com/BitTraceProject/BitTrace-Types/pkg/common"
 	"github.com/BitTraceProject/BitTrace-Types/pkg/config"
 	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
+	"strings"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -43,26 +44,23 @@ func NewDBInstanceCopy(dbInst *gorm.DB) (*gorm.DB, error) {
 
 func TryExecSql(dbInst *gorm.DB, sql string, dbConf config.DatabaseConfig) (*gorm.DB, error) {
 	var err error
-	err = common.ExecuteFunctionByRetry(func() error {
-		if dbInst == nil {
-			dbInst, err = NewDBInstance(dbConf)
-			if err != nil {
-				return err
-			}
-		} else {
-			dbInst, err = NewDBInstanceCopy(dbInst)
-			if err != nil {
-				return err
-			}
-		}
-		err = dbInst.Exec(sql).Error
+	if dbInst == nil {
+		dbInst, err = NewDBInstance(dbConf)
 		if err != nil {
-			dbInst = nil
-			return err
+			return nil, err
 		}
-		return nil // 查询用 Raw，写入用 Exec
-	})
-	return dbInst, err
+	} else {
+		dbInst, err = NewDBInstanceCopy(dbInst)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = dbInst.Exec(sql).Error
+	if err != nil && !strings.Contains(err.Error(), "Error 1065 (42000): Query was empty") {
+		dbInst = nil
+		return nil, err
+	}
+	return dbInst, nil // 查询用 Raw，写入用 Exec
 }
 
 func TryExecPipelineSql(dbInst *gorm.DB, sqlList []string, dbConf config.DatabaseConfig) (*gorm.DB, error) {
