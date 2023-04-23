@@ -18,6 +18,7 @@ const (
 	EXPORTER_POLL_DEFAULT_INTERVAL          = 100     // 100ms，exporter 定时检查是否新数据文件的间隔，该间隔内的数据会被打包，如果超出最大值，会先拆分再多打包几份
 	EXPORTER_POLL_DEFAULT_INTERVAL_BLOCKING = 1000    // 1000ms，发生阻塞时调整的间隔
 	EXPORTER_DATA_PACKAGE_MAXN              = 2 * 100 // 200条 snapshot，将数据打包，Logger 据此划分文件
+	EXPORTER_WATCH_MAX_DURATION             = 10 * time.Minute
 
 	RESOLVER_CONSUME_MQ_INTERVAL      = 300 * time.Millisecond // 300ms
 	RESOLVER_SNAPSHOTPAIR_STREAM_SIZE = 10                     // resolver handler 处 snapshot pair stream 的大小，注意：chan 里的元素是 snapshotPair list，不是单个数据结构

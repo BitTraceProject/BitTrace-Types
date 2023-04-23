@@ -23,6 +23,8 @@ type (
 
 	RevisionData interface{}
 
+	// TODO 添加各种时间戳数据，补齐其他数据
+
 	RevisionDataBlockReceiveInit struct {
 		PeerIPAddr      string `json:"peer_ip_addr"` // ipv4 or ipv6
 		MinerWalletAddr string `json:"miner_wallet_addr"`

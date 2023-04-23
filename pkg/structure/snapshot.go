@@ -1,10 +1,10 @@
 package structure
 
 import (
-	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
 	"time"
 
 	"github.com/BitTraceProject/BitTrace-Types/pkg/common"
+	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
 )
 
 type (

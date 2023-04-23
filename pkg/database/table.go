@@ -37,9 +37,11 @@ type (
 		FinalData      string `json:"final_data"` // json str
 	}
 	TableEventOrphan struct {
-		SnapshotID           string `json:"snapshot_id"`
-		EventTypeOrphan      int    `json:"event_type_orphan"`
-		OrphanBlockHash      string `json:"orphan_block_hash"`
-		EventOrphanTimestamp string `json:"event_orphan_timestamp"`
+		SnapshotID            string `json:"snapshot_id"`
+		EventTypeOrphan       int    `json:"event_type_orphan"`
+		OrphanParentBlockHash string `json:"orphan_parent_block_hash"`
+		OrphanBlockHash       string `json:"orphan_block_hash"`
+		ConnectMainChain      int    `json:"connect_main_chain"`
+		EventOrphanTimestamp  string `json:"event_orphan_timestamp"`
 	}
 )

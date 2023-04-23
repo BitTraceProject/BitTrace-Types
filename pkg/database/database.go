@@ -55,7 +55,8 @@ func TryExecSql(dbInst *gorm.DB, sql string, dbConf config.DatabaseConfig) (*gor
 			return nil, err
 		}
 	}
-	err = dbInst.Exec(sql).Error
+	dbInst = dbInst.Exec(sql)
+	err = dbInst.Error
 	if err != nil && !strings.Contains(err.Error(), "Error 1065 (42000): Query was empty") {
 		dbInst = nil
 		return nil, err

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/BitTraceProject/BitTrace-Types/pkg/constants"
@@ -40,7 +41,7 @@ func ScanFileLines(filePath string, startN int64) ([][]byte, bool, error) {
 			return nil, false, nil
 		}
 		// 当前 n 处还没有数据，但是已经 eof 了
-		if string(line[:len(line)-1]) == constants.LOGGER_EOF_DAY {
+		if strings.Contains(string(line[:len(line)-1]), constants.LOGGER_EOF_DAY) {
 			return nil, true, nil
 		}
 	}
@@ -50,7 +51,7 @@ func ScanFileLines(filePath string, startN int64) ([][]byte, bool, error) {
 		if err != nil {
 			break
 		}
-		if string(line) == constants.LOGGER_EOF_DAY {
+		if strings.Contains(string(line[:len(line)-1]), constants.LOGGER_EOF_DAY) {
 			return lines, true, nil
 		}
 		lines = append(lines, line[:len(line)-1])

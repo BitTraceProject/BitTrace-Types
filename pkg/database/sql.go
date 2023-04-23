@@ -20,8 +20,10 @@ CREATE TABLE IF NOT EXISTS %s (
   final_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY(snapshot_id),
   INDEX index_snapshot(target_chain_id,target_chain_height,block_hash),
-  INDEX index_snapshot_block_hash(block_hash)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='snapshot data table for exporter.';
+  INDEX index_snapshot_block_hash(block_hash),
+  INDEX index_snapshot_init_timestamp(init_timestamp),
+  INDEX index_snapshot_final_timestamp(final_timestamp)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 	sqlCreateTableSnapshotSync = `
 CREATE TABLE IF NOT EXISTS %s (
@@ -30,7 +32,7 @@ CREATE TABLE IF NOT EXISTS %s (
   target_chain_height int NOT NULL,
   sync_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY(snapshot_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='snapshot sync table for exporter';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 	sqlCreateTableState = `
 CREATE TABLE IF NOT EXISTS %s (
@@ -45,7 +47,7 @@ CREATE TABLE IF NOT EXISTS %s (
   total_txns bigint unsigned NOT NULL,
   median_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY(snapshot_id,snapshot_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='state table for exporter';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 	sqlCreateTableRevision = `
 CREATE TABLE IF NOT EXISTS %s (
@@ -56,17 +58,20 @@ CREATE TABLE IF NOT EXISTS %s (
   init_data json DEFAULT NULL,
   final_data json DEFAULT NULL,
   PRIMARY KEY(snapshot_id,revision_type,init_timestamp)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='revision table for exporter';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 	sqlCreateTableEventOrphan = `
 CREATE TABLE IF NOT EXISTS %s (
   snapshot_id varchar(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   event_type_orphan tinyint(1) NOT NULL,
+  orphan_parent_block_hash varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   orphan_block_hash varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  connect_main_chain tinyint(1) NOT NULL,
   event_orphan_timestamp varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY(snapshot_id,event_type_orphan),
+  INDEX index_orphan_parent_block_hash(orphan_parent_block_hash),
   INDEX index_orphan_block_hash(orphan_block_hash)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='snapshot data table for exporter.';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 	sqlInsert = `INSERT INTO %s(%s) VALUES %s;` // INSERT INTO table1(i) VALUES(1),(2),(3),(4),(5);
 )
@@ -98,8 +103,7 @@ func SqlInsertSnapshotData(tableName string, snapshotData ...TableSnapshotData) 
 	fields := "snapshot_id,target_chain_id,target_chain_height,block_hash,is_orphan,init_timestamp,final_timestamp"
 	values := make([]string, len(snapshotData))
 	for i, data := range snapshotData {
-
-		value := fmt.Sprintf("('%s','%s',%d,'%s','%d','%s','%s')",
+		value := fmt.Sprintf("('%s','%s',%d,'%s',%d,'%s','%s')",
 			data.SnapshotID,
 			data.TargetChainID,
 			data.TargetChainHeight,
@@ -179,13 +183,15 @@ func SqlInsertOrphanEvent(tableName string, orphanEvent ...TableEventOrphan) str
 	if len(orphanEvent) == 0 {
 		return ""
 	}
-	fields := "snapshot_id,event_type_orphan,orphan_block_hash,event_orphan_timestamp"
+	fields := "snapshot_id,event_type_orphan,orphan_parent_block_hash,orphan_block_hash,connect_main_chain,event_orphan_timestamp"
 	values := make([]string, len(orphanEvent))
 	for i, e := range orphanEvent {
-		value := fmt.Sprintf("('%s',%d,'%s','%s')",
+		value := fmt.Sprintf("('%s',%d,'%s','%s',%d,'%s')",
 			e.SnapshotID,
 			e.EventTypeOrphan,
+			e.OrphanParentBlockHash,
 			e.OrphanBlockHash,
+			e.ConnectMainChain,
 			e.EventOrphanTimestamp,
 		)
 		values[i] = value
